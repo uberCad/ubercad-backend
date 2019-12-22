@@ -1,14 +1,20 @@
-var createError = require('http-errors');
 var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
+var Cors = require('cors');
+//body parser
 var logger = require('morgan');
+var passport = require('passport');
+
+
+var createError = require('http-errors');
+var path = require('path');
+var session = require('express-session');
 var sassMiddleware = require('node-sass-middleware');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var apiRouter = require('./routes/api');
 var config = require('./services/config');
+var passportConfig = require('./services/passport');
 
 var app = express();
 
@@ -16,21 +22,38 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
-app.use(logger('dev'));
-app.use(express.json());
+
+app.use(Cors());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+app.use(express.json());
+app.use(logger('dev'));
+
+app.use(session({
+    secret: 'passport',
+    resave: true,
+    saveUninitialized: true
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+
+// app.use(cookieParser());
 app.use(sassMiddleware({
   src: path.join(__dirname, 'public'),
   dest: path.join(__dirname, 'public'),
   indentedSyntax: true, // true = .sass and false = .scss
   sourceMap: true
 }));
+
 app.use(express.static(path.join(__dirname, 'public')));
 
+
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/user', usersRouter);
 app.use('/api', apiRouter);
+
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

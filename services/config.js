@@ -5,6 +5,21 @@ const config = {
     'ARANGO_DB':   process.env.ARANGO_DB || 'cad',
     'ARANGO_USER': process.env.ARANGO_USER || 'cad',
     'ARANGO_PASS': process.env.ARANGO_PASS || '',
+    'JWT_SECRET': process.env.JWT_SECRET || '',
 };
+
+
+//passport
+
+//jwtConfig
+
+
+
+
+
+
+
+
+
 
 module.exports = config;
