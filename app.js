@@ -16,6 +16,9 @@ var apiRouter = require('./routes/api');
 var config = require('./services/config');
 var passportConfig = require('./services/passport');
 
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
+
 var app = express();
 
 // view engine setup
@@ -29,10 +32,14 @@ app.use(express.json());
 app.use(logger('dev'));
 
 app.use(session({
-    secret: 'passport',
+    secret: config.JWT_SECRET,
     resave: true,
     saveUninitialized: true
 }));
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser());
 
 app.use(passport.initialize());
 app.use(passport.session());
