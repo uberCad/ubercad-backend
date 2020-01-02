@@ -6,7 +6,7 @@ const config = {
     'ARANGO_USER': process.env.ARANGO_USER || 'cad',
     'ARANGO_PASS': process.env.ARANGO_PASS || '',
     'JWT_SECRET': process.env.JWT_SECRET || 'secret',
-    'GOOGLE_CREDENTIALS': process.env.GOOGLE_CREDENTIALS || {
+    'GOOGLE_CREDENTIALS': JSON.parse(process.env.GOOGLE_CREDENTIALS) || {
         "installed": {
             "client_id":"32532532532-5325432523525235235.apps.googleusercontent.com",
             "project_id":"ubercad",
