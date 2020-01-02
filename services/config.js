@@ -1,5 +1,8 @@
 require('dotenv').config();
 
+console.log(process.env);
+
+
 const config = {
     'ARANGO_HOST': process.env.ARANGO_HOST || 'http://127.0.0.1:8529',
     'ARANGO_DB':   process.env.ARANGO_DB || 'cad',
