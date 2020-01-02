@@ -1,6 +1,6 @@
 var db = require('./index').getDbHandler();
 var aql = require('arangojs').aql; // not needed in arangosh
-var bcrypt = require('bcrypt-nodejs');
+let security = require('../security');
 
 var User = db.collection('users');
 
@@ -16,20 +16,7 @@ exports.findUserByName = async function (username) {
     //return only first item
     return cursor.next();
 };
-exports.addUser = function (user) {
-    bcrypt.genSalt(10, function (err, salt) {
-        if (err) {
-            throw err;
-        }
-        bcrypt.hash(user.password, salt, null, function (err, hash) {
-            if (err) {
-                throw err;
-            }
-            user.password = hash;
-
-            User.save(user)
-        });
-    });
-
-
+exports.addUser = async function (user) {
+    user.password = await security.generateHash(user.password);
+    User.save(user)
 };
