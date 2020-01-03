@@ -43,8 +43,13 @@ router.post('/login', function(req, res) {
                 }, config.JWT_SECRET, {
                     expiresIn: "604800000" // 1 week
                 });
+
+                const {username} = user;
                 // return the information including token as JSON
-                res.json({success: true, token});
+                res.json({
+                    token,
+                    username
+                });
             } else {
                 res.status(401).send({success: false, msg: 'Authentication failed. Wrong password.'});
             }
