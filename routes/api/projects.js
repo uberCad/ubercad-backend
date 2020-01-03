@@ -12,10 +12,7 @@ router.get('/list/:filter', async function (req, res) {
         let projects = await projectDb.list(user, filter);
         res.json(projects);
     } catch (e) {
-        if (!e.isArangoError || e.errorNum !== DOC_NOT_FOUND) {
-            throw e;
-        }
-        res.throw(404, 'The entry does not exist', e);
+        res.status(404).send({msg: 'The entry does not exist'});
     }
 });
 
@@ -24,12 +21,12 @@ router.get('/:key', async function (req, res) {
         const { user } = req;
         const { key } = req.params;
         let project = await projectDb.get(key, user);
+        if (!project) {
+            throw new Error("Not found");
+        }
         res.json(project);
     } catch (e) {
-        if (!e.isArangoError || e.errorNum !== DOC_NOT_FOUND) {
-            throw e;
-        }
-        res.throw(404, 'The entry does not exist', e);
+        res.status(404).send({msg: 'The entry does not exist'});
     }
 });
 

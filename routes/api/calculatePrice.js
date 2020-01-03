@@ -102,10 +102,7 @@ router.post('/', async function(req, res, next) {
         }
         res.send(price);
     } catch (e) {
-        if (!e.isArangoError || e.errorNum !== DOC_NOT_FOUND) {
-            throw e;
-        }
-        res.throw(404, 'The entry does not exist', e);
+        res.status(404).send({msg: 'The entry does not exist'});
     }
 });
 
