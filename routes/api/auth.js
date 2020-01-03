@@ -31,7 +31,7 @@ router.post('/signup', async function(req, res) {
 });
 
 
-router.post('/signin', function(req, res) {
+router.post('/login', function(req, res) {
     userDb.findUserByName(req.body.username).then(user => {
         // check if password matches
         security.comparePassword(req.body.password, user.password, function (err, isMatch) {
@@ -56,7 +56,7 @@ router.post('/signin', function(req, res) {
 });
 
 
-router.get('/signout', passport.authenticate('jwt', { session: false}), function(req, res) {
+router.post('/logout', function(req, res) {
     req.logout();
     res.json({success: true, msg: 'Sign out successfully.'});
 });
