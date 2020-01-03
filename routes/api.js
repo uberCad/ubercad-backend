@@ -3,13 +3,17 @@ var router = express.Router();
 var apiAuth = require('./api/auth');
 var apiProjects = require('./api/projects');
 var apiProject = require('./api/project');
-var securedRoute = require('./api/securedRoute');
 var calculatePrice = require('./api/calculatePrice');
+var materials = require('./api/materials');
+
+var securedRoute = require('./api/securedRoute');
 
 router.use('/auth', apiAuth);
 router.use('/projects', apiProjects);
 router.use('/project', apiProject);
-router.use('/securedRoute', securedRoute);
 router.use('/calculate', calculatePrice);
+router.use('/materials', materials);
+
+router.use('/securedRoute', securedRoute);
 
 module.exports = router;
