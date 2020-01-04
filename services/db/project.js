@@ -140,4 +140,41 @@ exports.snapshot = async function (key, user) {
     return result.next();
 };
 
+exports.create = async function (title, fileName, file, user) {
+    const params = {
+        userId: user._id,
+        title,
+        fileName,
+        file
+    };
+
+    const query = `
+    LET exist = (FOR p IN OUTBOUND @userId project_relation
+                 FILTER p.title == @title
+                 RETURN p._key)
+    FILTER LENGTH(exist) < 1
+    LET project = (
+        INSERT {
+            title: @title,
+            createdAt: DATE_NOW(),
+            fileName: @fileName,
+            status: "active",
+            file: @file
+        } IN projects
+        RETURN NEW
+    )
+    LET relation = (
+        INSERT {
+            _from: @userId,
+            _to: project[0]._id,
+            "role": "owner"
+        } IN project_relation
+        RETURN NEW
+    )
+
+    RETURN project[0]._key`;
+
+    const result = await db.query(query, params);
+    return result.next();
+};
 
