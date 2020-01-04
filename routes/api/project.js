@@ -21,19 +21,6 @@ router.get('/file/:key', async function (req, res) {
     }
 });
 
-router.get('/snapshot/:key', async function (req, res) {
-    try {
-        const { user } = req;
-        const { key } = req.params;
-        let snapshot = await projectDb.snapshot(key, user);
-        if (!snapshot) {
-            throw new Error("Not found");
-        }
-        res.json(snapshot);
-    } catch (e) {
-        res.status(404).send({msg: 'The entry does not exist'});
-    }
-});
 
 router.post('/add', function (req, res) {
     try {
@@ -59,6 +46,33 @@ router.post('/add', function (req, res) {
     }
 });
 
+router.post('/archive', async function (req, res) {
+    try {
+        const { user } = req;
+        const { key, status } = req.body;
+
+        const project = await projectDb.edit(key, {
+            status
+        }, user);
+        res.json(project);
+    } catch (e) {
+        res.throw(404, 'The entry does not exist', e);
+    }
+});
+
+router.post('/rename', async function (req, res) {
+    try {
+        const { user } = req;
+        const { key, title } = req.body;
+
+        const project = await projectDb.edit(key, {
+            title
+        }, user);
+        res.json(project);
+    } catch (e) {
+        res.throw(404, 'The entry does not exist', e);
+    }
+});
 
 
 module.exports = router;
