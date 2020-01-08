@@ -29,8 +29,6 @@ app.set('view engine', 'hbs');
 
 
 app.use(Cors());
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
 app.use(logger('dev'));
 
 app.use(session({
@@ -39,8 +37,8 @@ app.use(session({
     saveUninitialized: true
 }));
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 app.use(cookieParser());
 
 app.use(passport.initialize());

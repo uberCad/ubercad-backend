@@ -48,3 +48,67 @@ exports.get = async function (key, user) {
 };
 
 
+exports.add = async function (projectKey, user, snapshot, objects) {
+    const params = {
+        userId: user._key,
+        projectKey,
+        snapshotTitle: snapshot.title,
+        createdAt: Date.now(),
+        layers: snapshot.layers,
+    };
+
+    if (objects && objects.length) {
+        params.objects = [];
+    }
+
+    const query = `
+    LET exist = (
+        FOR s IN snapshots
+        FILTER s.projectKey == @projectKey
+        FILTER s.createdBy == @userId
+        FILTER s.title == @snapshotTitle
+        RETURN s._key
+    )
+    FILTER LENGTH(exist) < 1
+    
+    LET snapshot = (
+        INSERT {
+            title: @snapshotTitle,
+            createdBy: @userId,
+            projectKey: @projectKey,
+            createdAt: @createdAt,
+            layers: @layers
+        } IN snapshots
+        RETURN NEW
+    )
+
+    LET objectList = [${
+        objects.map((object, idx) => {
+            params.objects.push({
+                title: object.title,
+                parameters: object.parameters
+            });
+
+            return `{
+                title: @objects[${idx}].title,
+                createdBy: @userId,
+                snapshotKey: snapshot[0]._key,
+                projectKey: @projectKey,
+                createdAt: @createdAt,
+                parameters: @objects[${idx}].parameters
+            }`;
+        }).join(',\n')
+    }]
+    
+    FOR object IN objectList INSERT object INTO objects
+
+    RETURN {
+        _key: snapshot[0]._key,
+        title: snapshot[0].title
+    }`;
+
+    const result = await db.query(query, params);
+    return result.next();
+};
+
+
