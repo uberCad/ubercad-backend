@@ -47,6 +47,46 @@ exports.get = async function (key, user) {
     return result.next();
 };
 
+exports.delete = async function(key, user) {
+    const params = {
+        userKey: user._key,
+        key
+    };
+
+    const query = `
+        FOR snapshot IN snapshots
+            FILTER snapshot.createdBy == @userKey
+            FILTER snapshot._key == @key
+            REMOVE snapshot IN snapshots
+        
+        FOR items IN objects
+            FILTER items.createdBy == @userKey
+            FILTER items.snapshotKey == @key
+        REMOVE items IN objects
+        
+        `;
+
+    const result = await db.query(query, params);
+    return result.next();
+};
+
+exports.rename = async function (key, title, user) {
+    const params = {
+        key,
+        title,
+        userKey: user._key,
+    };
+
+    const query = `
+        FOR snapshot IN snapshots
+            FILTER snapshot._key == @key
+            FILTER snapshot.createdBy == @userKey
+            UPDATE snapshot WITH { title: @title } IN snapshots
+          RETURN NEW`;
+
+    const result = await db.query(query, params);
+    return result.next();
+};
 
 exports.add = async function (projectKey, user, snapshot, objects) {
     const params = {

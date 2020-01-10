@@ -74,6 +74,16 @@ router.post('/rename', async function (req, res) {
     }
 });
 
+router.delete('/:key', async function (req, res) {
+    try {
+        const { user } = req;
+        const { key } = req.params;
+        let project = await projectDb.remove(key, user);
+        res.json(project);
+    } catch (e) {
+        res.json(e.toString());
+    }
+});
 
 module.exports = router;
 

@@ -42,7 +42,7 @@ exports.get = async function (key, user) {
     FILTER project._key == @key
             
         LET snaps = (   FOR snapshot IN snapshots
-                        FILTER snapshot.projectKey == @key AND !snapshot.deleted
+                        FILTER snapshot.projectKey == @key
                         SORT snapshot.createdAt
                         
                         LET objs = (
@@ -129,6 +129,54 @@ exports.create = async function (title, fileName, file, user) {
     )
 
     RETURN project[0]._key`;
+
+    const result = await db.query(query, params);
+    return result.next();
+};
+
+exports.remove = async function(projectKey, user) {
+    const params = {
+        projectKey,
+        userId: user._id,
+        projectId: 'projects/' + projectKey
+    };
+
+    const query = `
+        FOR project IN OUTBOUND @userId project_relation
+            FILTER project._key == @projectKey
+            REMOVE project IN projects
+
+        LET snaps = (
+            FOR snapshot IN snapshots
+                FILTER snapshot.projectKey == @projectKey
+                REMOVE snapshot IN snapshots
+                
+                LET objs = (
+                    FOR object IN objects
+                    FILTER object.snapshotKey == snapshot._key
+                    REMOVE object IN objects
+                    
+                    RETURN {
+                      key: object._key,
+                      oTitle: object.title
+                    }
+                )
+                RETURN {
+                    key: snapshot._key,
+                    sTitle: snapshot.title,
+                    objects: objs
+                }
+            )
+            
+        FOR relation IN project_relation
+        FILTER relation._from == @userId AND relation._to == @projectId
+        REMOVE relation IN project_relation
+            
+        RETURN {
+            key: project._id,
+            pTitle: project.title,
+            snapshots: snaps
+        }`;
 
     const result = await db.query(query, params);
     return result.next();

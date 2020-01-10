@@ -48,7 +48,8 @@ router.post('/login', function(req, res) {
                 // return the information including token as JSON
                 res.json({
                     token,
-                    username
+                    username,
+                    pictureUrl: 'https://avatars3.githubusercontent.com/u/42713614?s=200&v=4'
                 });
             } else {
                 res.status(401).send({success: false, msg: 'Authentication failed. Wrong password.'});
