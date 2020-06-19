@@ -55,6 +55,10 @@ app.use(sassMiddleware({
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+//load fixtures
+if (process.argv.includes("load-fixtures")) {
+    require('./services/init').loadFixtures();
+}
 
 app.use('/', indexRouter);
 app.use('/user', usersRouter);
