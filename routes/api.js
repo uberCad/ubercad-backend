@@ -17,7 +17,6 @@ router.use('/project', apiProject);
 router.use('/snapshot', apiSnapshot);
 router.use('/calculate', calculatePrice);
 router.use('/materials', materials);
-
 router.use('/securedRoute', securedRoute);
 
 module.exports = router;
