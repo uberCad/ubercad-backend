@@ -9,7 +9,7 @@ exports.loadFixtures = function () {
     console.log('load fixtures');
 
     // create collections
-    ['categories', 'google_session', 'materials', 'objects', 'orders', 'projects', 'sessions', 'snapshots', 'users', 'edge/project_relation'].forEach((name) => {
+    ['categories', 'parts', 'google_session', 'materials', 'objects', 'orders', 'projects', 'sessions', 'snapshots', 'users', 'edge/project_relation'].forEach((name) => {
         let collection;
         if (name.startsWith('edge')) {
             collection = db.edgeCollection(name.slice(5));
