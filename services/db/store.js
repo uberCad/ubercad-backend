@@ -1,7 +1,6 @@
 let db = require('./index').getDbHandler();
 let aql = require('arangojs').aql; // not needed in arangosh
 
-let Part = db.collection('parts');
 let Material = db.collection('materials');
 let Category = db.collection('categories');
 
@@ -12,7 +11,6 @@ exports.getCategories = async function (user, key) {
     };
 
     const query = `
-       
         LET parentCategory = (
             FOR parentCategory IN categories
             FILTER parentCategory._key == @key
@@ -37,12 +35,27 @@ exports.getCategories = async function (user, key) {
             }
         )
         
-        
-    
+        LET parts = (
+            FOR part IN parts
+            FILTER part.categoryKey == @key
+            
+            RETURN {
+                _key: part._key,
+                _id: part._id,
+                title: part.title,
+                categoryKey: part.categoryKey,
+                userKey: part.userKey,
+                materialKey: part.materialKey,
+                width: part.width,
+                height: part.height,               
+                createdAt: part.createdAt
+            }
+        )
+
     RETURN {
         category: parentCategory,
         subCategories: subCategories,
-        parts: [1,2,3]
+        parts: parts
     }
     `;
 
@@ -97,5 +110,38 @@ exports.add = async function({title, categoryKey, width, height, materialKey, ob
 };
 
 exports.get = async function(user, key) {
-    return await Part.document(key.toString());
+    const params = {
+        key: key + ""
+    };
+
+    try {
+        const query = `
+    
+            FOR part IN parts
+            FILTER part._key == @key
+            
+            LET material = DOCUMENT("materials", part.materialKey)
+            LET category = DOCUMENT("categories", part.categoryKey)
+            
+            RETURN {
+                _key: part._key,
+                _id: part._id,
+                title: part.title,
+                categoryKey: part.categoryKey,
+                category: category,
+                userKey: part.userKey,
+                materialKey: part.materialKey,
+                material: material,
+                width: part.width,
+                height: part.height,               
+                createdAt: part.createdAt,
+                object: part.object
+            }
+        `;
+
+        const result = await db.query(query, params);
+        return result.next();
+    } catch (e) {
+        console.log(e);
+    }
 };
