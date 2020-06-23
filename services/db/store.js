@@ -4,7 +4,7 @@ let aql = require('arangojs').aql; // not needed in arangosh
 let Material = db.collection('materials');
 let Category = db.collection('categories');
 
-exports.getCategories = async function (user, key) {
+exports.getCategories = async function (user, key = "0") {
     const params = {
         key: key+"",
         parent_key: parseInt(key) || 0
@@ -39,6 +39,8 @@ exports.getCategories = async function (user, key) {
             FOR part IN parts
             FILTER part.categoryKey == @key
             
+            LET material = DOCUMENT("materials", part.materialKey)
+            
             RETURN {
                 _key: part._key,
                 _id: part._id,
@@ -46,11 +48,13 @@ exports.getCategories = async function (user, key) {
                 categoryKey: part.categoryKey,
                 userKey: part.userKey,
                 materialKey: part.materialKey,
+                material: material,
                 width: part.width,
                 height: part.height,               
-                createdAt: part.createdAt
+                createdAt: part.createdAt,
+                object: part.object
             }
-        )
+        ) 
 
     RETURN {
         category: parentCategory,
@@ -71,7 +75,11 @@ exports.add = async function({title, categoryKey, width, height, materialKey, ob
         throw "Material not found";
     }
     try {
-        category = await Category.document(categoryKey.toString());
+        if (categoryKey !== 0) {
+            category = await Category.document(categoryKey.toString());
+        } else {
+            category = {_key: "0"};
+        }
     } catch (e) {
         throw "Category not found";
     }
