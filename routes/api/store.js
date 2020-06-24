@@ -5,7 +5,20 @@ let storeDb = require('../../services/db/store');
 
 router.use(passport.authenticate('jwt', { session: false}));
 
-router.get('/category/:key?', async function (req, res) {
+router.get('/category/all', async function (req, res) {
+    try {
+        const { user } = req;
+        let categories = await storeDb.getCategoriesAll(user);
+        if (!categories) {
+            throw new Error("Not found");
+        }
+        res.json(categories);
+    } catch (e) {
+        res.status(404).send({msg: 'The entry does not exist', e});
+    }
+});
+
+router.get('/category/:key', async function (req, res) {
     try {
         const { user } = req;
         const { key } = req.params;

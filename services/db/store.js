@@ -67,6 +67,25 @@ exports.getCategories = async function (user, key = "0") {
     return result.next();
 };
 
+exports.getCategoriesAll = async function(user) {
+    try {
+        const query = `
+        FOR category IN categories
+        SORT category.parent_key ASC
+        RETURN {
+            _key: category._key,
+            _id: category._id,
+            title: category.title,
+            parent_key: category.parent_key
+        }
+    `;
+        const result = await db.query(query);
+        return result.nextBatch();
+    } catch (e) {
+        console.log(e);
+    }
+};
+
 exports.add = async function({title, categoryKey, width, height, materialKey, object}, user) {
     let material, category;
     try {
