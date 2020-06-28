@@ -33,7 +33,7 @@ router.post('/', async function (req, res, next) {
     }
 });
 
-router.get('/:key/:hash', async function (req, res) {
+router.get('/:key/:hash(*)', async function (req, res) {
     try {
         const { user } = req;
         const { key, hash } = req.params;
