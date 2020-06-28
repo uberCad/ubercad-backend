@@ -17,7 +17,33 @@ router.get('/code', async function (req, res, next) {
     res.json(auth);
 });
 
-router.post('/', async function(req, res, next) {
+
+router.post('/ru', async function(req, res, next) {
+    const eurPerKg = 3.23; //d5
+    const c11 = 0.40; // коэф рент, если заказ 1-10000 м
+    const c12 = 0.45; // коэф рент, если заказ 10001-30000 м
+    const c13 = 0.50; // коэф рент, если заказ 30001-50000 м
+
+    let objects = req.body;
+    const price = [];
+    for (let object of objects) {
+        console.log(object);
+
+        let kgPerM = object.weight; // d6
+
+        let d9 = eurPerKg / 0.57 * kgPerM;
+
+        price.push({
+            minOrderQty: "0",
+            price10000: d9 / c11,
+            price30000: d9 / c12,
+            price50000: d9 / c13
+        });
+    }
+    res.send(price);
+});
+
+router.post('/eu', async function(req, res, next) {
     try {
         let auth;
         try {
