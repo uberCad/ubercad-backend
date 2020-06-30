@@ -36,24 +36,7 @@ router.get('/category/:key', async function (req, res) {
 router.post('/part', async function (req, res) {
     try {
         const { user } = req;
-        const {
-            title,
-            categoryKey,
-            width,
-            height,
-            materialKey,
-            object,
-            svgIcon
-        } = req.body;
-        const partKey = await storeDb.add({
-            title,
-            categoryKey,
-            width,
-            height,
-            materialKey,
-            object,
-            svgIcon
-        }, user);
+        const partKey = await storeDb.add(req.body, user);
         res.json({_key: partKey});
     } catch (e) {
         res.status(404).send({msg: 'The entry does not exist', e});

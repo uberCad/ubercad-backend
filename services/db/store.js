@@ -127,11 +127,10 @@ exports.add = async function({title, categoryKey, width, height, materialKey, ob
                 width: @width,
                 height: @height,
                 object: @object,
-                svgIcon: @svgIcon,
+                svgIcon: @svgIcon
             } IN parts
             RETURN NEW
         )
-    
         RETURN part[0]._key`;
 
     const result = await db.query(query, params);
