@@ -25,7 +25,8 @@ exports.loadFixtures = function () {
     // create test user
     let testuser = {
         username: 'testuser',
-        password: 'password'
+        password: 'password',
+        type: 'login'
     };
     let user = userDb.addUser(testuser);
     console.log('created test user', testuser);

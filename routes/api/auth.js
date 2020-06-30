@@ -19,7 +19,8 @@ router.post('/signup', async function(req, res) {
         try {
             let user = await userDb.addUser({
                 username: req.body.username,
-                password: req.body.password
+                password: req.body.password,
+                type: 'login'
             });
             //todo try to auth right now
             res.json({success: true, msg: 'Successful created new user.'});
@@ -64,8 +65,8 @@ router.post('/login', function(req, res) {
 router.get('/facebook', passport.authenticate('facebook'));
 
 router.get('/fb/auth2code',
-    passport.authenticate('facebook', { successRedirect: '/',
-        failureRedirect: '/login' }));
+    passport.authenticate('facebook', { successRedirect: `//${config.DOMAIN_CLIENT}/`,
+        failureRedirect: `//${config.DOMAIN_CLIENT}/login` }));
 
 router.post('/logout', function(req, res) {
     req.logout();

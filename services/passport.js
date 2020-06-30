@@ -28,10 +28,8 @@ passport.use(new FacebookStrategy({
     },
     async function(accessToken, refreshToken, profile, done) {
         try {
-            console.log('accessToken', accessToken);
-            console.log('refreshToken', refreshToken);
-            console.log('profile', profile);
-            let user = await User.findOrCreate(profile);
+            let user = await User.findOrCreateFb(profile);
+            console.log('fb login. user', user);
             return done(null, user);
         } catch (e) {
             return done(null, false);

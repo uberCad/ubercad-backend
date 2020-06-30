@@ -2,6 +2,7 @@ let express = require('express');
 let router = express.Router();
 let passport = require('passport');
 let storeDb = require('../../services/db/store');
+let User = require('../../services/db/user');
 
 router.use(passport.authenticate('jwt', { session: false}));
 

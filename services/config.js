@@ -24,6 +24,7 @@ const config = {
     'FACEBOOK_APP_ID': process.env.FACEBOOK_APP_ID || '23132112312331221',
     'FACEBOOK_APP_SECRET': process.env.FACEBOOK_APP_SECRET || '2313211231233122secret1',
     'DOMAIN_API': process.env.DOMAIN_API || 'ubercad-api.bitstack.tech',
+    'DOMAIN_CLIENT': process.env.DOMAIN_CLIENT || 'ubercad.bitstack.tech',
 };
 
 module.exports = config;
