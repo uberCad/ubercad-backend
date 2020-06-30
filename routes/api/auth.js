@@ -65,8 +65,41 @@ router.post('/login', function(req, res) {
 router.get('/facebook', passport.authenticate('facebook'));
 
 router.get('/fb/auth2code',
-    passport.authenticate('facebook', { successRedirect: `//${config.DOMAIN_CLIENT}/`,
-        failureRedirect: `//${config.DOMAIN_CLIENT}/login` }));
+    passport.authenticate('facebook', {
+        // successRedirect: `//${config.DOMAIN_CLIENT}/`,
+        failureRedirect: `//${config.DOMAIN_CLIENT}/login`
+    }), (req, res) => {
+        const user = req.user;
+
+        var token = jwt.sign({
+            key: user._key,
+            username: user.username,
+        }, config.JWT_SECRET, {
+            expiresIn: "604800000" // 1 week
+        });
+
+        const {username} = user;
+
+        res.send(`
+            ${JSON.stringify(user)}
+          <script>
+            localStorage.setItem('token', '${`Bearer ${token}`}');
+            // localtion.href = '/'
+          </script>
+      `);
+
+        //
+        // // return the information including token as JSON
+        // res.json({
+        //     token,
+        //     username,
+        //     pictureUrl: 'https://avatars3.githubusercontent.com/u/42713614?s=200&v=4'
+        // });
+
+
+
+    });
+
 
 router.post('/logout', function(req, res) {
     req.logout();
