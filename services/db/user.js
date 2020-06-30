@@ -40,7 +40,7 @@ exports.findOrCreateFb = async function (profile) {
                 username: @username,
                 type: @type,
                 createdAt: DATE_NOW()
-            } IN parts
+            } IN users
             RETURN NEW
         )
         RETURN user[0]

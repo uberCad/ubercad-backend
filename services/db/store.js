@@ -52,7 +52,7 @@ exports.getCategories = async function (user, key = "0") {
                 width: part.width,
                 height: part.height,               
                 createdAt: part.createdAt,
-                object: part.object
+                svgIcon: part.svgIcon
             }
         ) 
 
@@ -162,7 +162,8 @@ exports.get = async function(user, key) {
                 width: part.width,
                 height: part.height,               
                 createdAt: part.createdAt,
-                object: part.object
+                object: part.object,
+                svgIcon: part.svgIcon
             }
         `;
 
