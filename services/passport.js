@@ -3,6 +3,7 @@ var User = require('./db/user');
 
 var passport = require('passport'),
     LocalStrategy = require('passport-local').Strategy,
+    FacebookStrategy = require('passport-facebook').Strategy,
     JWTStrategy = require('passport-jwt').Strategy,
     ExtractJwt = require('passport-jwt').ExtractJwt;
 
@@ -20,36 +21,20 @@ passport.use(new JWTStrategy({
     }
 ));
 
-// passport.use(new LocalStrategy(
-                // (username, password, done) => {
-                //     if(username === 'postgres' && password === 'password') {
-                //         return done(null, {username: 'postgres'});
-                //     } else {
-                //         return done(null, false);
-                //     }
-                // }
-    // function(username, password, done) {
-    //
-    //         console.log(username, password);
-    //
-    //
-    //         User.findOne({ username: username }, function (err, user) {
-    //             if (err) { return done(err); }
-    //             if (!user) {
-    //                 return done(null, false, { message: 'Incorrect username.' });
-    //             }
-    //             if (!user.validPassword(password)) {
-    //                 return done(null, false, { message: 'Incorrect password.' });
-    //             }
-    //             return done(null, user);
-    //         });
-    //     }
-// ));
-
-// passport.serializeUser(function(user, done) {
-//     done(null, user.username);
-// });
-//
-// passport.deserializeUser((username, done) => {
-//     done(null, {username: username});
-// });
+passport.use(new FacebookStrategy({
+        clientID: config.FACEBOOK_APP_ID,
+        clientSecret: config.FACEBOOK_APP_SECRET,
+        callbackURL: "https://" + config.DOMAIN_API + "/api/auth/fb/auth2code"
+    },
+    async function(accessToken, refreshToken, profile, done) {
+        try {
+            console.log('accessToken', accessToken);
+            console.log('refreshToken', refreshToken);
+            console.log('profile', profile);
+            let user = await User.findOrCreate(profile);
+            return done(null, user);
+        } catch (e) {
+            return done(null, false);
+        }
+    }
+));

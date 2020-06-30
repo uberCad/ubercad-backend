@@ -21,6 +21,9 @@ const config = {
         }
     },
     'SPREADSHEET_ID': process.env.SPREADSHEET_ID || '54kjh654kj6546j_54jh654kjh654kjh654jg654hjg6',
+    'FACEBOOK_APP_ID': process.env.FACEBOOK_APP_ID || '23132112312331221',
+    'FACEBOOK_APP_SECRET': process.env.FACEBOOK_APP_SECRET || '2313211231233122secret1',
+    'DOMAIN_API': process.env.DOMAIN_API || 'ubercad-api.bitstack.tech',
 };
 
 module.exports = config;

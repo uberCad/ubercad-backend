@@ -8,6 +8,10 @@ exports.findOne = function (key) {
     return User.document(key.toString());
 };
 
+exports.findOrCreate = function (key) {
+    return User.document(key.toString());
+};
+
 exports.findUserByName = async function (username) {
     let cursor = await db.query(aql`
         FOR document IN users

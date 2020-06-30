@@ -61,6 +61,11 @@ router.post('/login', function(req, res) {
     });
 });
 
+router.get('/facebook', passport.authenticate('facebook'));
+
+router.get('/fb/auth2code',
+    passport.authenticate('facebook', { successRedirect: '/',
+        failureRedirect: '/login' }));
 
 router.post('/logout', function(req, res) {
     req.logout();
