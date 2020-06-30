@@ -86,7 +86,7 @@ exports.getCategoriesAll = async function(user) {
     }
 };
 
-exports.add = async function({title, categoryKey, width, height, materialKey, object}, user) {
+exports.add = async function({title, categoryKey, width, height, materialKey, object, svgIcon}, user) {
     let material, category;
     try {
         material = await Material.document(materialKey.toString());
@@ -112,7 +112,8 @@ exports.add = async function({title, categoryKey, width, height, materialKey, ob
         materialKey: material._key,
         width,
         height,
-        object
+        object,
+        svgIcon
     };
 
     const query = `    
@@ -125,7 +126,8 @@ exports.add = async function({title, categoryKey, width, height, materialKey, ob
                 createdAt: DATE_NOW(),
                 width: @width,
                 height: @height,
-                object: @object
+                object: @object,
+                svgIcon: @svgIcon,
             } IN parts
             RETURN NEW
         )

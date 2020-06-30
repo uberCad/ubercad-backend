@@ -42,7 +42,8 @@ router.post('/part', async function (req, res) {
             width,
             height,
             materialKey,
-            object
+            object,
+            svgIcon
         } = req.body;
         const partKey = await storeDb.add({
             title,
@@ -50,7 +51,8 @@ router.post('/part', async function (req, res) {
             width,
             height,
             materialKey,
-            object
+            object,
+            svgIcon
         }, user);
         res.json({_key: partKey});
     } catch (e) {
