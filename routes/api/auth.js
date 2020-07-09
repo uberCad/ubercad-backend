@@ -71,33 +71,26 @@ router.get('/fb/auth2code',
     }), (req, res) => {
         const user = req.user;
 
-        var token = jwt.sign({
+        let token = jwt.sign({
             key: user._key,
             username: user.username,
         }, config.JWT_SECRET, {
             expiresIn: "604800000" // 1 week
         });
-
+        //${JSON.stringify(user)}
         const {username} = user;
-
-        res.send(`
-            ${JSON.stringify(user)}
-          <script>
-            localStorage.setItem('token', '${`Bearer ${token}`}');
-            // localtion.href = '/'
-          </script>
-      `);
-
-        //
-        // // return the information including token as JSON
-        // res.json({
-        //     token,
-        //     username,
-        //     pictureUrl: 'https://avatars3.githubusercontent.com/u/42713614?s=200&v=4'
-        // });
-
-
-
+        const redirectUrl = `//${config.DOMAIN_CLIENT}/login/${username}/${token}`;
+        res.send(`<!DOCTYPE html><html><head>
+            <meta http-equiv="Refresh" content="0; url='${redirectUrl}'" />
+        </head>            
+        <body>
+            redirecting...
+            <script>
+                localStorage.setItem('token', '${`Bearer ${token}`}');
+                location.href = '${redirectUrl}';
+            </script>
+        </body>
+        </html>`);
     });
 
 
