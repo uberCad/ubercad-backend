@@ -1,20 +1,20 @@
 var db = require('./index').getDbHandler();
-var aql = require('arangojs').aql; // not needed in arangosh
+var { aql } = require('arangojs'); // not needed in arangosh
 
 var Project = db.collection('projects');
 
 exports.list = async function (user, filter = 'active') {
-    const params = {
-        userId: user._id,
-    };
+  const params = {
+    userId: user._id
+  };
 
-    let filterString = '';
-    if (filter !== 'all') {
-        filterString = 'FILTER projects.status == @filter';
-        params.filter = filter
-    }
+  let filterString = '';
+  if (filter !== 'all') {
+    filterString = 'FILTER projects.status == @filter';
+    params.filter = filter;
+  }
 
-    const query = `
+  const query = `
     FOR projects IN ANY @userId project_relation
     OPTIONS { bfs: true, uniqueVertices: 'global' }
     ${filterString}
@@ -27,17 +27,17 @@ exports.list = async function (user, filter = 'active') {
         status: projects.status
     }`;
 
-    const result = await db.query(query, params);
-    return result.nextBatch();
+  const result = await db.query(query, params);
+  return result.nextBatch();
 };
 
 exports.get = async function (key, user) {
-    const params = {
-        userId: user._id,
-        key
-    };
+  const params = {
+    userId: user._id,
+    key
+  };
 
-    const query = `
+  const query = `
     FOR project IN OUTBOUND @userId project_relation
     FILTER project._key == @key
             
@@ -77,34 +77,34 @@ exports.get = async function (key, user) {
             snapshots: snaps   
         }`;
 
-    const result = await db.query(query, params);
-    return result.nextBatch();
+  const result = await db.query(query, params);
+  return result.nextBatch();
 };
 
 exports.file = async function (key, user) {
-    const params = {
-        userId: user._id,
-        key
-    };
+  const params = {
+    userId: user._id,
+    key
+  };
 
-    const query = `
+  const query = `
     FOR projects IN OUTBOUND @userId project_relation
         FILTER projects._key == @key
         RETURN projects.file`;
 
-    const result = await db.query(query, params);
-    return result.next();
+  const result = await db.query(query, params);
+  return result.next();
 };
 
 exports.create = async function (title, fileName, file, user) {
-    const params = {
-        userId: user._id,
-        title,
-        fileName,
-        file
-    };
+  const params = {
+    userId: user._id,
+    title,
+    fileName,
+    file
+  };
 
-    const query = `
+  const query = `
     LET exist = (FOR p IN OUTBOUND @userId project_relation
                  FILTER p.title == @title
                  RETURN p._key)
@@ -130,18 +130,18 @@ exports.create = async function (title, fileName, file, user) {
 
     RETURN project[0]._key`;
 
-    const result = await db.query(query, params);
-    return result.next();
+  const result = await db.query(query, params);
+  return result.next();
 };
 
-exports.remove = async function(projectKey, user) {
-    const params = {
-        projectKey,
-        userId: user._id,
-        projectId: 'projects/' + projectKey
-    };
+exports.remove = async function (projectKey, user) {
+  const params = {
+    projectKey,
+    userId: user._id,
+    projectId: `projects/${projectKey}`
+  };
 
-    const query = `
+  const query = `
         FOR project IN OUTBOUND @userId project_relation
             FILTER project._key == @projectKey
             REMOVE project IN projects
@@ -178,31 +178,30 @@ exports.remove = async function(projectKey, user) {
             snapshots: snaps
         }`;
 
-    const result = await db.query(query, params);
-    return result.next();
+  const result = await db.query(query, params);
+  return result.next();
 };
 
 exports.edit = async function (key, fields, user) {
-    const params = {
-        key,
-        userId: user._id,
-        ...fields
-    };
+  const params = {
+    key,
+    userId: user._id,
+    ...fields
+  };
 
-    const query = `
+  const query = `
         FOR project IN OUTBOUND @userId project_relation
             FILTER project._key == @key
             UPDATE project WITH {
-                ${Object.keys(fields).map(field => `${field}: @${field}`).join(', ')} 
+                ${Object.keys(fields).map((field) => `${field}: @${field}`).join(', ')} 
             } IN projects
             LET newProject = NEW
           
         RETURN {
             _key: newProject._key,
-            ${Object.keys(fields).map(field => `${field}: newProject.${field}`).join(', ')} 
+            ${Object.keys(fields).map((field) => `${field}: newProject.${field}`).join(', ')} 
         }`;
 
-    const result = await db.query(query, params);
-    return result.next();
+  const result = await db.query(query, params);
+  return result.next();
 };
-

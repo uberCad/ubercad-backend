@@ -1,15 +1,17 @@
-let express = require('express');
-let router = express.Router();
-let apiAuth = require('./api/auth');
-let apiUser = require('./api/user');
-let apiProjects = require('./api/projects');
-let apiProject = require('./api/project');
-let apiSnapshot = require('./api/snapshot');
-let calculatePrice = require('./api/calculatePrice');
-let order = require('./api/order');
-let materials = require('./api/materials');
-let store = require('./api/store');
-let securedRoute = require('./api/securedRoute');
+const express = require('express');
+
+const router = express.Router();
+const apiAuth = require('./api/auth');
+const apiUser = require('./api/user');
+const apiProjects = require('./api/projects');
+const apiProject = require('./api/project');
+const apiSnapshot = require('./api/snapshot');
+const calculatePrice = require('./api/calculatePrice');
+const order = require('./api/order');
+const materials = require('./api/materials');
+const store = require('./api/store');
+const securedRoute = require('./api/securedRoute');
+const flixo = require('./api/flixo/router');
 
 router.use('/auth', apiAuth);
 router.use('/user', apiUser);
@@ -21,5 +23,6 @@ router.use('/order', order);
 router.use('/materials', materials);
 router.use('/securedRoute', securedRoute);
 router.use('/store', store);
+router.use('/flixo', flixo);
 
 module.exports = router;

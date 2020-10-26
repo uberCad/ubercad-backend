@@ -1,15 +1,15 @@
 var db = require('./index').getDbHandler();
-var aql = require('arangojs').aql; // not needed in arangosh
+var { aql } = require('arangojs'); // not needed in arangosh
 
 var Snapshot = db.collection('snapshots');
 
 exports.get = async function (key, user) {
-    const params = {
-        userId: user._id,
-        key
-    };
+  const params = {
+    userId: user._id,
+    key
+  };
 
-    const query = `
+  const query = `
         FOR snapshot IN snapshots
            
         //find project related to snapshot and current user   
@@ -43,17 +43,17 @@ exports.get = async function (key, user) {
             project: project
         }`;
 
-    const result = await db.query(query, params);
-    return result.next();
+  const result = await db.query(query, params);
+  return result.next();
 };
 
-exports.delete = async function(key, user) {
-    const params = {
-        userKey: user._key,
-        key
-    };
+exports.delete = async function (key, user) {
+  const params = {
+    userKey: user._key,
+    key
+  };
 
-    const query = `
+  const query = `
         FOR snapshot IN snapshots
             FILTER snapshot.createdBy == @userKey
             FILTER snapshot._key == @key
@@ -66,42 +66,42 @@ exports.delete = async function(key, user) {
         
         `;
 
-    const result = await db.query(query, params);
-    return result.next();
+  const result = await db.query(query, params);
+  return result.next();
 };
 
 exports.rename = async function (key, title, user) {
-    const params = {
-        key,
-        title,
-        userKey: user._key,
-    };
+  const params = {
+    key,
+    title,
+    userKey: user._key
+  };
 
-    const query = `
+  const query = `
         FOR snapshot IN snapshots
             FILTER snapshot._key == @key
             FILTER snapshot.createdBy == @userKey
             UPDATE snapshot WITH { title: @title } IN snapshots
           RETURN NEW`;
 
-    const result = await db.query(query, params);
-    return result.next();
+  const result = await db.query(query, params);
+  return result.next();
 };
 
 exports.add = async function (projectKey, user, snapshot, objects) {
-    const params = {
-        userId: user._key,
-        projectKey,
-        snapshotTitle: snapshot.title,
-        createdAt: Date.now(),
-        layers: snapshot.layers,
-    };
+  const params = {
+    userId: user._key,
+    projectKey,
+    snapshotTitle: snapshot.title,
+    createdAt: Date.now(),
+    layers: snapshot.layers
+  };
 
-    if (objects && objects.length) {
-        params.objects = [];
-    }
+  if (objects && objects.length) {
+    params.objects = [];
+  }
 
-    const query = `
+  const query = `
     LET exist = (
         FOR s IN snapshots
         FILTER s.projectKey == @projectKey
@@ -123,13 +123,13 @@ exports.add = async function (projectKey, user, snapshot, objects) {
     )
 
     LET objectList = [${
-        objects.map((object, idx) => {
-            params.objects.push({
-                title: object.title,
-                parameters: object.parameters
-            });
+  objects.map((object, idx) => {
+    params.objects.push({
+      title: object.title,
+      parameters: object.parameters
+    });
 
-            return `{
+    return `{
                 title: @objects[${idx}].title,
                 createdBy: @userId,
                 snapshotKey: snapshot[0]._key,
@@ -137,8 +137,8 @@ exports.add = async function (projectKey, user, snapshot, objects) {
                 createdAt: @createdAt,
                 parameters: @objects[${idx}].parameters
             }`;
-        }).join(',\n')
-    }]
+  }).join(',\n')
+}]
     
     FOR object IN objectList INSERT object INTO objects
 
@@ -147,8 +147,6 @@ exports.add = async function (projectKey, user, snapshot, objects) {
         title: snapshot[0].title
     }`;
 
-    const result = await db.query(query, params);
-    return result.next();
+  const result = await db.query(query, params);
+  return result.next();
 };
-
-

@@ -1,12 +1,14 @@
-let db = require('./index').getDbHandler();
-let aql = require('arangojs').aql; // not needed in arangosh
+const db = require('./index').getDbHandler();
+const { aql } = require('arangojs'); // not needed in arangosh
 
-exports.add = async function({createdBy, createdAt, contactInformation, order, orderObjects, hash}, user) {
-    const params = {
-        createdBy, createdAt, contactInformation, order, orderObjects, hash
-    };
+exports.add = async function ({
+  createdBy, createdAt, contactInformation, order, orderObjects, hash
+}, user) {
+  const params = {
+    createdBy, createdAt, contactInformation, order, orderObjects, hash
+  };
 
-    const query = `    
+  const query = `    
         LET order = (
             INSERT {
                 createdBy: @createdBy,
@@ -21,27 +23,28 @@ exports.add = async function({createdBy, createdAt, contactInformation, order, o
     
         RETURN order[0]._key`;
 
-    const result = await db.query(query, params);
-    return result.next();
+  const result = await db.query(query, params);
+  return result.next();
 };
 
-exports.get = async function(user, key, hash) {
-    const params = {
-        key: key + "",
-        hash
-    };
+exports.get = async function (user, key, hash) {
+  const params = {
+    key: `${key}`,
+    hash
+  };
 
-    try {
-        const query = `
+  try {
+    const query = `
 
             FOR order IN orders
             FILTER order._key == @key && order.hash == @hash
             RETURN order
         `;
 
-        const result = await db.query(query, params);
-        return result.next();
-    } catch (e) {
-        console.log(e);
-    }
+    const result = await db.query(query, params);
+    return result.next();
+  }
+  catch (e) {
+    console.log(e);
+  }
 };

@@ -1,16 +1,16 @@
-let db = require('./index').getDbHandler();
-let aql = require('arangojs').aql; // not needed in arangosh
+const db = require('./index').getDbHandler();
+const { aql } = require('arangojs'); // not needed in arangosh
 
-let Material = db.collection('materials');
-let Category = db.collection('categories');
+const Material = db.collection('materials');
+const Category = db.collection('categories');
 
-exports.getCategories = async function (user, key = "0") {
-    const params = {
-        key: key+"",
-        parent_key: parseInt(key) || 0
-    };
+exports.getCategories = async function (user, key = '0') {
+  const params = {
+    key: `${key}`,
+    parent_key: parseInt(key) || 0
+  };
 
-    const query = `
+  const query = `
         LET parentCategory = (
             FOR parentCategory IN categories
             FILTER parentCategory._key == @key
@@ -63,13 +63,13 @@ exports.getCategories = async function (user, key = "0") {
     }
     `;
 
-    const result = await db.query(query, params);
-    return result.next();
+  const result = await db.query(query, params);
+  return result.next();
 };
 
-exports.getCategoriesAll = async function(user) {
-    try {
-        const query = `
+exports.getCategoriesAll = async function (user) {
+  try {
+    const query = `
         FOR category IN categories
         SORT category.parent_key ASC
         RETURN {
@@ -79,44 +79,51 @@ exports.getCategoriesAll = async function(user) {
             parent_key: category.parent_key
         }
     `;
-        const result = await db.query(query);
-        return result.nextBatch();
-    } catch (e) {
-        console.log(e);
-    }
+    const result = await db.query(query);
+    return result.nextBatch();
+  }
+  catch (e) {
+    console.log(e);
+  }
 };
 
-exports.add = async function({title, categoryKey, width, height, materialKey, object, svgIcon}, user) {
-    let material, category;
-    try {
-        material = await Material.document(materialKey.toString());
-    } catch (e) {
-        throw "Material not found";
+exports.add = async function ({
+  title, categoryKey, width, height, materialKey, object, svgIcon
+}, user) {
+  let material,
+    category;
+  try {
+    material = await Material.document(materialKey.toString());
+  }
+  catch (e) {
+    throw 'Material not found';
+  }
+  try {
+    if (categoryKey !== 0) {
+      category = await Category.document(categoryKey.toString());
     }
-    try {
-        if (categoryKey !== 0) {
-            category = await Category.document(categoryKey.toString());
-        } else {
-            category = {_key: "0"};
-        }
-    } catch (e) {
-        throw "Category not found";
+    else {
+      category = { _key: '0' };
     }
+  }
+  catch (e) {
+    throw 'Category not found';
+  }
 
-    // check if user admin
+  // check if user admin
 
-    const params = {
-        title,
-        userKey: user._key,
-        categoryKey: category._key,
-        materialKey: material._key,
-        width,
-        height,
-        object,
-        svgIcon
-    };
+  const params = {
+    title,
+    userKey: user._key,
+    categoryKey: category._key,
+    materialKey: material._key,
+    width,
+    height,
+    object,
+    svgIcon
+  };
 
-    const query = `    
+  const query = `    
         LET part = (
             INSERT {
                 title: @title,
@@ -133,17 +140,17 @@ exports.add = async function({title, categoryKey, width, height, materialKey, ob
         )
         RETURN part[0]._key`;
 
-    const result = await db.query(query, params);
-    return result.next();
+  const result = await db.query(query, params);
+  return result.next();
 };
 
-exports.get = async function(user, key) {
-    const params = {
-        key: key + ""
-    };
+exports.get = async function (user, key) {
+  const params = {
+    key: `${key}`
+  };
 
-    try {
-        const query = `
+  try {
+    const query = `
     
             FOR part IN parts
             FILTER part._key == @key
@@ -168,9 +175,10 @@ exports.get = async function(user, key) {
             }
         `;
 
-        const result = await db.query(query, params);
-        return result.next();
-    } catch (e) {
-        console.log(e);
-    }
+    const result = await db.query(query, params);
+    return result.next();
+  }
+  catch (e) {
+    console.log(e);
+  }
 };
