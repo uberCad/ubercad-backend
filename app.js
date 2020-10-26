@@ -1,30 +1,30 @@
-var express = require('express');
-var Cors = require('cors');
+const express = require('express');
+ cors = require('cors');
 // body parser
-var logger = require('morgan');
-var passport = require('passport');
+const logger = require('morgan');
+const passport = require('passport');
 
-var createError = require('http-errors');
-var path = require('path');
-var session = require('express-session');
-var sassMiddleware = require('node-sass-middleware');
+const createError = require('http-errors');
+const path = require('path');
+const session = require('express-session');
+const sassMiddleware = require('node-sass-middleware');
 
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var config = require('./services/config');
-var passportConfig = require('./services/passport');
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
+const config = require('./services/config');
+// const passportConfig = require('./services/passport');
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-var apiRouter = require('./routes/api');
+const indexRouter = require('./routes/index');
+const usersRouter = require('./routes/users');
+const apiRouter = require('./routes/api');
 
-var app = express();
+const app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
-app.use(Cors());
+app.use(cors());
 app.use(logger('dev'));
 
 app.use(session({

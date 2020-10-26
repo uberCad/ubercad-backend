@@ -1,3 +1,4 @@
+// What does this functionality do?
 router.post('/order', (req, res) => {
   try {
     const user = users.document(req.session.uid);

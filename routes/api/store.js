@@ -1,66 +1,50 @@
-const express = require('express');
-
-const router = express.Router();
+const router = require('express').Router();
 const passport = require('passport');
 const storeDb = require('../../services/db/store');
-const User = require('../../services/db/user');
 
 router.use(passport.authenticate('jwt', { session: false }));
 
-router.get('/category/all', async (req, res) => {
-  try {
-    const { user } = req;
-    const categories = await storeDb.getCategoriesAll(user);
-    if (!categories) {
-      throw new Error('Not found');
-    }
-    res.json(categories);
-  }
-  catch (e) {
-    res.status(404).send({ msg: 'The entry does not exist', e });
-  }
+router.get('/category/all', (req, res, next) => {
+  storeDb
+    .getCategoriesAll(req.user)
+    .then((categories) => {
+      if (!categories) {
+        throw new Error('Not found');
+      }
+      res.json(categories);
+    })
+    .catch(next);
 });
 
-router.get('/category/:key', async (req, res) => {
-  try {
-    const { user } = req;
-    const { key } = req.params;
-    const categories = await storeDb.getCategories(user, key);
-    if (!categories) {
-      throw new Error('Not found');
-    }
-    res.json(categories);
-  }
-  catch (e) {
-    res.status(404).send({ msg: 'The entry does not exist', e });
-  }
+router.get('/category/:key', (req, res, next) => {
+  storeDb
+    .getCategories(req.user, req.params.key)
+    .then((categories) => {
+      if (!categories) {
+        throw new Error('Not found');
+      }
+      res.json(categories);
+    })
+    .catch(next);
 });
 
-router.post('/part', async (req, res) => {
-  try {
-    const { user } = req;
-    const partKey = await storeDb.add(req.body, user);
-    res.json({ _key: partKey });
-  }
-  catch (e) {
-    res.status(404).send({ msg: 'The entry does not exist', e });
-  }
+router.post('/part', (req, res, next) => {
+  storeDb
+    .add(req.body, req.user)
+    .then((partKey) => res.json({ _key: partKey }))
+    .catch(next);
 });
 
-router.get('/part/:key?', async (req, res) => {
-  try {
-    const { user } = req;
-    const { key } = req.params;
-
-    const part = await storeDb.get(user, key);
-    if (!part) {
-      throw new Error('Not found');
-    }
-    res.json(part);
-  }
-  catch (e) {
-    res.status(404).send({ msg: 'The entry does not exist', e });
-  }
+router.get('/part/:key?', (req, res, next) => {
+  storeDb
+    .get(req.user, req.key)
+    .then((part) => {
+      if (!part) {
+        throw new Error('Not found');
+      }
+      res.json(part);
+    })
+    .catch(next);
 });
 
 module.exports = router;

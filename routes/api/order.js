@@ -1,10 +1,8 @@
-const express = require('express');
-
-const router = express.Router();
+const router = require('express').Router();
 const passport = require('passport');
 
 const security = require('../../services/security');
-const orderDb = require('../../services/db/order');
+const Order = require('../../services/db/order');
 
 router.use(passport.authenticate('jwt', { session: false }));
 
@@ -12,42 +10,33 @@ router.use(passport.authenticate('jwt', { session: false }));
  * POST /order
  */
 router.post('/', async (req, res, next) => {
-  try {
-    const { user } = req;
-    console.log(user);
-    const hash = await security.generateHash(`${user._key} order ${(new Date()).getTime()}`);
-
-    const orderKey = await orderDb.add({
-      createdBy: user._key,
+  const hash = await security.generateHash(`${req.user._key} order ${(new Date()).getTime()}`);
+  Order
+    .add({
+      createdBy: req.user._key,
       createdAt: Date.now(),
       contactInformation: req.body.contactInformation,
       order: req.body.order,
       orderObjects: req.body.orderObjects,
       hash
-    }, user);
-    res.json({
+    }, req.user)
+    .then((orderKey) => res.json({
       message: 'Your order is accepted. Thank you.',
       link: `order/${orderKey}/${hash}`
-    });
-  }
-  catch (e) {
-    console.log(e);
-  }
+    }))
+    .catch(next);
 });
 
-router.get('/:key/:hash(*)', async (req, res) => {
-  try {
-    const { user } = req;
-    const { key, hash } = req.params;
-    const order = await orderDb.get(user, key, hash);
-    if (!order) {
-      throw new Error('Not found');
-    }
-    res.json(order);
-  }
-  catch (e) {
-    res.status(404).send({ msg: 'The entry does not exist', e });
-  }
+router.get('/:key/:hash(*)', (req, res, next) => {
+  Order
+    .get(req.user, req.params.key, req.params.hash)
+    .then((order) => {
+      if (!order) {
+        throw new Error('Not found');
+      }
+      res.json(order);
+    })
+    .catch(next);
 });
 
 module.exports = router;

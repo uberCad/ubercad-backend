@@ -1,26 +1,22 @@
-var express = require('express');
-
-var router = express.Router();
-var passport = require('passport');
+const router = require('express').Router();
+const passport = require('passport');
 const multer = require('multer');
-var projectDb = require('../../services/db/project');
+
+const Project = require('../../services/db/project');
 const { dxfFilter } = require('../../services/helpers');
 
 router.use(passport.authenticate('jwt', { session: false }));
 
-router.get('/file/:key', async (req, res) => {
-  try {
-    const { user } = req;
-    const { key } = req.params;
-    const file = await projectDb.file(key, user);
-    if (!file) {
-      throw new Error('Not found');
-    }
-    res.json(file);
-  }
-  catch (e) {
-    res.status(404).send({ msg: 'The entry does not exist' });
-  }
+router.get('/file/:key', (req, res, next) => {
+  Project
+    .file(req.params.key, req.user)
+    .then((file) => {
+      if (!file) {
+        throw new Error('Not found');
+      }
+      res.json(file);
+    })
+    .catch(next);
 });
 
 router.post('/add', (req, res) => {
@@ -39,7 +35,7 @@ router.post('/add', (req, res) => {
       }
 
       const { title, fileName } = req.body;
-      const projectKey = await projectDb.create(title, fileName, req.file.buffer.toString(), user);
+      const projectKey = await Project.create(title, fileName, req.file.buffer.toString(), user);
       res.json({ _key: projectKey });
     });
   }
@@ -48,46 +44,37 @@ router.post('/add', (req, res) => {
   }
 });
 
-router.post('/archive', async (req, res) => {
-  try {
-    const { user } = req;
-    const { key, status } = req.body;
-
-    const project = await projectDb.edit(key, {
-      status
-    }, user);
-    res.json(project);
-  }
-  catch (e) {
-    res.throw(404, 'The entry does not exist', e);
-  }
+router.post('/archive', (req, res, next) => {
+  Project
+    .edit(
+      req.params.key,
+      {
+        status: req.params.status
+      },
+      req.user
+    )
+    .then((project) => res.json(project))
+    .catch(next);
 });
 
-router.post('/rename', async (req, res) => {
-  try {
-    const { user } = req;
-    const { key, title } = req.body;
-
-    const project = await projectDb.edit(key, {
-      title
-    }, user);
-    res.json(project);
-  }
-  catch (e) {
-    res.throw(404, 'The entry does not exist', e);
-  }
+router.post('/rename', (req, res, next) => {
+  Project
+    .edit(
+      req.params.key,
+      {
+        title: req.params.title
+      },
+      req.user
+    )
+    .then((project) => res.json(project))
+    .catch(next);
 });
 
-router.delete('/:key', async (req, res) => {
-  try {
-    const { user } = req;
-    const { key } = req.params;
-    const project = await projectDb.remove(key, user);
-    res.json(project);
-  }
-  catch (e) {
-    res.json(e.toString());
-  }
+router.delete('/:key', (req, res, next) => {
+  Project
+    .remove(req.params.key, req.user)
+    .then((project) => res.json(project))
+    .catch(next);
 });
 
 module.exports = router;

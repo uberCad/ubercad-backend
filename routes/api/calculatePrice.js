@@ -5,6 +5,7 @@ const { google } = require('googleapis');
 const googleAuth = require('../../services/googleAuth');
 const config = require('../../services/config');
 
+// DO we need that?
 router.get('/', (req, res, next) => {
   res.json({
     resp: 'API calculate price'
@@ -12,11 +13,13 @@ router.get('/', (req, res, next) => {
 });
 
 router.get('/code', async (req, res, next) => {
-  const auth = await googleAuth.getAuth(req.query.code);
-  res.json(auth);
+  googleAuth
+    .getAuth(req.query.code)
+    .then((data) => res.json(data))
+    .catch(next);
 });
 
-router.post('/ru', async (req, res, next) => {
+router.post('/ru', (req, res) => {
   const eurPerKg = 3.23; // d5
   const c11 = 0.40; // коэф рент, если заказ 1-10000 м
   const c12 = 0.45; // коэф рент, если заказ 10001-30000 м
@@ -25,12 +28,8 @@ router.post('/ru', async (req, res, next) => {
   const objects = req.body;
   const price = [];
   for (const object of objects) {
-    console.log(object);
-
     const kgPerM = object.weight; // d6
-
     const d9 = eurPerKg / 0.57 * kgPerM;
-
     price.push({
       minOrderQty: '0',
       price10000: d9 / c11,

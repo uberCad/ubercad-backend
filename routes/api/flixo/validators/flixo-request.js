@@ -18,29 +18,24 @@ const schema = {
       type: 'object',
       properties: {
         frame: {
-          type: 'string',
-          required: true
+          type: 'string'
         },
         material_list: {
-          type: 'string',
-          required: true
+          type: 'string'
         },
         svg_w_h: {
-          type: 'string',
-          required: true
+          type: 'string'
         },
         token: {
-          type: 'string',
-          required: true
+          type: 'string'
         },
         svg: {
-          type: 'string',
-          required: true
+          type: 'string'
         }
       }
     }
   },
-  required: ['id', 'jsonrpc', 'method', 'params'],
+  required: ['id', 'jsonrpc', 'method', 'params', 'params.frame', 'params.material_list', 'params.svg_w_h', 'params.token', 'params.svg'],
   additionalProperties: false
 };
 

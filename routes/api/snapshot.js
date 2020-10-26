@@ -1,83 +1,64 @@
-var express = require('express');
-
-var router = express.Router();
-var passport = require('passport');
-var snapshotDb = require('../../services/db/snapshot');
-var objectDb = require('../../services/db/object');
+const router = require('express').Router();
+const passport = require('passport');
+const Snapshot = require('../../services/db/snapshot');
+const objectDb = require('../../services/db/object');
 
 router.use(passport.authenticate('jwt', { session: false }));
 
-router.get('/:key', async (req, res) => {
-  try {
-    const { user } = req;
-    const { key } = req.params;
-    const snapshot = await snapshotDb.get(key, user);
-    if (!snapshot) {
-      throw new Error('Not found');
-    }
-    res.json(snapshot);
-  }
-  catch (e) {
-    res.status(404).send({ msg: 'The entry does not exist' });
-  }
+router.get('/:key', (req, res, next) => {
+  Snapshot
+    .get(req.key, req.user)
+    .then((snapshot) => {
+      if (!snapshot) {
+        throw new Error('Not found');
+      }
+      res.json(snapshot);
+    })
+    .catch(next);
 });
 
-router.post('/add/:projectKey', async (req, res) => {
-  try {
-    const { user } = req;
-    const { projectKey } = req.params;
-    const snapshot = await snapshotDb.add(projectKey, user, {
+router.post('/add/:projectKey', (req, res, next) => {
+  Snapshot
+    .add(req.params.projectKey, req.user, {
       title: req.body.title,
-      createdBy: user._key,
+      createdBy: req.user._key,
       createdAt: Date.now(),
       layers: req.body.layers
-    }, req.body.objects);
-
-    if (!snapshot) {
-      // It means that snapshot with same name in this project was created, so new snapshot now inserted to DB due conflict
-      return res.status(400).send({ msg: 'Snapshot with same title already exists' });
-    }
-    res.json(snapshot);
-  }
-  catch (e) {
-    res.status(400).send({ msg: 'Something went wrong' });
-  }
+    }, req.body.objects)
+    .then((snapshot) => {
+      if (!snapshot) {
+        return res
+          .status(400)
+          .send({
+            msg: 'Snapshot with same title already exists'
+          });
+      }
+      res.json(snapshot);
+    })
+    .catch(next);
 });
 
-router.delete('/:key', async (req, res) => {
-  try {
-    const { user } = req;
-    const { key } = req.params;
-    await snapshotDb.delete(key, user);
-    res.json({ msg: 'success' });
-  }
-  catch (e) {
-    res.status(400).send({ msg: 'Something went wrong' });
-  }
+router.delete('/:key', (req, res) => {
+  Snapshot
+    .delete(req.params.key, req.user)
+    .then(() => res.json({ msg: 'success' }))
+    .catch(() => res
+      .status(400)
+      .send({ msg: 'Something went wrong' })
+    );
 });
 
-router.post('/rename', async (req, res) => {
-  try {
-    const { user } = req;
-    const { key, title } = req.body;
-    const snapshot = await snapshotDb.rename(key, title, user);
-    res.json(snapshot);
-  }
-  catch (e) {
-    res.status(400).send({ msg: 'Something went wrong' });
-  }
+router.post('/rename', (req, res, next) => {
+  Snapshot.rename(req.body.key, req.body.title, req.user)
+    .then((snapshot) => res.json(snapshot))
+    .catch(next);
 });
 
-router.get('/object/:key', async (req, res) => {
-  try {
-    const { user } = req;
-    const { key } = req.params;
-    const object = await objectDb.get(key, user);
-    res.json(object);
-  }
-  catch (e) {
-    res.status(404).send({ msg: 'The entry does not exist' });
-  }
+router.get('/object/:key', (req, res, next) => {
+  objectDb
+    .get(req.params.key, req.user)
+    .then((object) => res.json(object))
+    .catch(next);
 });
 
 module.exports = router;

@@ -1,36 +1,26 @@
-var express = require('express');
-
-var router = express.Router();
-var passport = require('passport');
-var projectDb = require('../../services/db/project');
+const router = require('express').Router();
+const passport = require('passport');
+const Project = require('../../services/db/project');
 
 router.use(passport.authenticate('jwt', { session: false }));
 
-router.get('/list/:filter', async (req, res) => {
-  try {
-    const { user } = req;
-    const { filter } = req.params;
-    const projects = await projectDb.list(user, filter);
-    res.json(projects);
-  }
-  catch (e) {
-    res.status(404).send({ msg: 'The entry does not exist' });
-  }
+router.get('/list/:filter', (req, res, next) => {
+  Project
+    .list(req.user, req.params.filter)
+    .then((projects) => res.json(projects))
+    .catch(next);
 });
 
-router.get('/:key', async (req, res) => {
-  try {
-    const { user } = req;
-    const { key } = req.params;
-    const project = await projectDb.get(key, user);
-    if (!project) {
-      throw new Error('Not found');
-    }
-    res.json(project);
-  }
-  catch (e) {
-    res.status(404).send({ msg: 'The entry does not exist' });
-  }
+router.get('/:key', (req, res, next) => {
+  Project
+    .get(req.params.key, req.user)
+    .then((project) => {
+      if (!project) {
+        throw new Error('Not found');
+      }
+      res.json(project);
+    })
+    .catch(next);
 });
 
 module.exports = router;

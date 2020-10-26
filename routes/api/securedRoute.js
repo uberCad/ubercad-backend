@@ -6,6 +6,7 @@ var passport = require('passport');
 router.use(passport.authenticate('jwt', { session: false }));
 
 /* GET users listing. */
+// Do we need that?
 router.get('/', (req, res, next) => {
   res.json({
     resp: 'API secured route'
