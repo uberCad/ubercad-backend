@@ -1,10 +1,9 @@
 const router = require('express').Router();
 const service = require('./service');
-// const validate = require('../middleware/validate-middleware')
-// const validator = require('./validator')
+const validator = require('../../middleware/validate');
+const validation = require('./validation');
 
-router.post('/check', (req, res, next) => {
-  console.log(req.body);
+router.post('/check', validator(validation.flixo), (req, res, next) => {
   service
     .checkSvg(req.body)
     .then((data) => res.send(data))
